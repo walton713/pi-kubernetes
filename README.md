@@ -2,7 +2,7 @@
 
 This README covers setting up the Walton Home Server on a Raspberry Pi running Ubuntu Server.
 
-## Setting up a new Pi
+## Setting up a Pi as a server
 
 ### Update system
 
@@ -73,17 +73,6 @@ sudo usermod -a -G microk8s hal
 ```bash
 mkdir ~/.kube
 mco > ~/.kube/config
-```
-
-### Create root CA and certificate
-
-```bash
-mkdir ~/certs
-cd ~/certs
-
-openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes -keyout waltonCA.key \
--out waltonCA.crt -subj "/C=US/ST=Iowa/L=Indianola/O=Walton Farms/OU=Home/CN=walton.farms" \
--addext "subjectAltName=DNS:walton.farms,DNS:www.walton.farms"
 ```
 
 ### Enable Dashboard and Ingress
