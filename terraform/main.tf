@@ -3,6 +3,10 @@ provider "kubernetes" {
   config_context = "microk8s"
 }
 
+module "storage" {
+  source = "./modules/storage"
+}
+
 resource "kubernetes_ingress_v1" "dashboard-ingress" {
   metadata {
     name      = "dashboard-ingress"

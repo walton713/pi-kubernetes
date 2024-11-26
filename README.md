@@ -2,6 +2,23 @@
 
 This README covers setting up the Walton Home Server on a Raspberry Pi running Ubuntu Server.
 
+## Current Domains
+
+| Domain          | Description              |
+|-----------------|--------------------------|
+| dashboard.local | The Kubernetes Dashboard |
+
+## Deploying Terraform
+
+Ensure the kubeconfig for the server is at `~/.kube/config`
+
+```bash
+export KUBECONFIG=~/.kube/config
+cd terraform
+terraform plan -out out.tfplan
+terraform apply out.tfplan
+```
+
 ## Setting up a Pi as a server
 
 ### Update system
@@ -79,4 +96,10 @@ mco > ~/.kube/config
 
 ```bash
 me dashboard ingress
+```
+
+### Add storage label to master
+
+```bash
+microk8s.kubectl label node master hdd=enabled
 ```
