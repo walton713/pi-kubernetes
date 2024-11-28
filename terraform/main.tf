@@ -3,6 +3,12 @@ provider "kubernetes" {
   config_context = "microk8s"
 }
 
+module "monitoring" {
+  source = "./modules/monitoring"
+
+  nfs_server_ip = module.storage.storage_ip
+}
+
 module "storage" {
   source = "./modules/storage"
 }
@@ -14,7 +20,6 @@ resource "kubernetes_ingress_v1" "dashboard-ingress" {
 
     annotations = {
       "kubernetes.io/ingress.class"                  = "nginx"
-      "nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
     }
   }
 
@@ -22,7 +27,7 @@ resource "kubernetes_ingress_v1" "dashboard-ingress" {
     ingress_class_name = "nginx"
 
     rule {
-      host = "dashboard.local"
+      host = "dashboard.walton.farms"
 
       http {
         path {

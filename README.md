@@ -26,6 +26,7 @@ terraform apply out.tfplan
 ```bash
 sudo apt upgrade
 sudo apt update
+sudo apt install zsh nfs-common
 ```
 
 ### Install oh-my-zsh
@@ -38,26 +39,13 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/too
 
 Add the following plugins to the .zshrc file:
 
-- docker
-- docker-compose
-- git
-- kubectl
 - microk8s
-- npm
-- nvm
-- pip
-- pylint
-- python
-- terraform
-- yarn
 
 Change the ZSH_THEME to "clean"
 
 Add the following to the end of the file:
 
 ```bash
-alias tffr='terraform fmt --recursive'
-
 export KUBECONFIG=~/.kube/config
 ```
 
@@ -98,8 +86,51 @@ mco > ~/.kube/config
 me dashboard ingress
 ```
 
+### Mount external hdd
+
+```bash
+# Get the drive information
+lsblk -o NAME,FSTYPE,UUID
+
+# Add to fstab
+sudo vi /etc/fstab
+
+# Add this line with information for NAME
+# UUID=<UUID> /nfs <FSTYPE> defaults 0 0
+```
+
 ### Add storage label to master
 
 ```bash
 microk8s.kubectl label node master hdd=enabled
+```
+
+### Install Node-Exporter
+
+Download
+
+```bash
+curl -SL https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-arm64.tar.gz > node_exporter.tar.gz && sudo tar -xvf node_exporter.tar.gz -C /usr/local/bin/ --strip-components=1
+```
+
+Create service file at `/etc/systemd/system/nodeexporter.service`
+
+```ini
+[Unit]
+Description=NodeExporter
+
+[Service]
+TimeoutStartSec=0
+ExecStart=/usr/local/bin/node_exporter
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Register the service
+
+```bash
+sudo systemctl daemon-reload \
+&& sudo systemctl enable nodeexporter \
+&& sudo systemctl start nodeexporter
 ```
