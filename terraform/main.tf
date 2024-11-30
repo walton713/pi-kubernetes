@@ -20,6 +20,7 @@ resource "kubernetes_ingress_v1" "dashboard-ingress" {
 
     annotations = {
       "kubernetes.io/ingress.class"                  = "nginx"
+      "nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
     }
   }
 
@@ -27,7 +28,7 @@ resource "kubernetes_ingress_v1" "dashboard-ingress" {
     ingress_class_name = "nginx"
 
     rule {
-      host = "dashboard.walton.farms"
+      host = "dashboard.local"
 
       http {
         path {

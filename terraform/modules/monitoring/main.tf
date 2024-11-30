@@ -234,8 +234,7 @@ resource "kubernetes_ingress_v1" "grafana-ingress" {
     namespace = "monitoring"
 
     annotations = {
-      "kubernetes.io/ingress-class"                  = "nginx"
-    #   "nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
+      "kubernetes.io/ingress-class" = "nginx"
     }
   }
 
@@ -265,14 +264,13 @@ resource "kubernetes_ingress_v1" "grafana-ingress" {
   }
 }
 
-resource "kubernetes_ingress_v1" "prom-ingress" {
+resource "kubernetes_ingress_v1" "prometheus-ingress" {
   metadata {
-    name      = "prom-ingress"
+    name      = "prometheus-ingress"
     namespace = "monitoring"
 
     annotations = {
-      "kubernetes.io/ingress-class"                  = "nginx"
-    #   "nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
+      "kubernetes.io/ingress-class" = "nginx"
     }
   }
 
@@ -280,7 +278,7 @@ resource "kubernetes_ingress_v1" "prom-ingress" {
     ingress_class_name = "nginx"
 
     rule {
-      host = "prom.local"
+      host = "prometheus.local"
 
       http {
         path {

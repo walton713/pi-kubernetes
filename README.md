@@ -4,11 +4,11 @@ This README covers setting up the Walton Home Server on a Raspberry Pi running U
 
 ## Current Domains
 
-| Domain          | Description              |
-|-----------------|--------------------------|
-| dashboard.local | The Kubernetes Dashboard |
-| prom.local      | The Prometheus UI        |
-| grafana.local   | The Grafana UI           |
+| Domain           | Description              |
+|------------------|--------------------------|
+| dashboard.local  | The Kubernetes Dashboard |
+| prometheus.local | The Prometheus UI        |
+| grafana.local    | The Grafana UI           |
 
 ## Deploying Terraform
 
@@ -63,31 +63,6 @@ add the following to the end of the line:
 cgroup_enable=memory cgroup_memory=1
 ```
 
-### Install microk8s
-
-```bash
-sudo snap install microk8s --classic
-```
-
-### Add hal to microk8s group
-
-```bash
-sudo usermod -a -G microk8s hal
-```
-
-### Copy kubeconfig to home directory
-
-```bash
-mkdir ~/.kube
-mco > ~/.kube/config
-```
-
-### Enable Dashboard and Ingress
-
-```bash
-me dashboard ingress
-```
-
 ### Mount external hdd
 
 ```bash
@@ -99,12 +74,6 @@ sudo vi /etc/fstab
 
 # Add this line with information for NAME
 # UUID=<UUID> /nfs <FSTYPE> defaults 0 0
-```
-
-### Add storage label to master
-
-```bash
-microk8s.kubectl label node master hdd=enabled
 ```
 
 ### Install Node-Exporter
@@ -135,4 +104,50 @@ Register the service
 sudo systemctl daemon-reload \
 && sudo systemctl enable nodeexporter \
 && sudo systemctl start nodeexporter
+```
+
+### Install microk8s
+
+```bash
+sudo snap install microk8s --classic
+```
+
+### Add hal to microk8s group
+
+```bash
+sudo usermod -a -G microk8s hal
+```
+
+### Copy kubeconfig to home directory
+
+```bash
+mkdir ~/.kube
+mco > ~/.kube/config
+```
+
+### Enable Dashboard and Ingress
+
+```bash
+me dashboard ingress host-access
+```
+
+### Add storage label to master
+
+```bash
+microk8s.kubectl label node master hdd=enabled
+```
+
+### Add Prometheus metrics to Ingress Controller
+
+```bash
+microk8s.kubectl edit daemonset/nginx-ingress-microk8s-controller -n ingress
+```
+
+Add the following annotations to the pod template:
+
+```yml
+prometheus.io/scrape: "true"
+prometheus.io/scheme: "http"
+prometheus.io/port: "10254"
+prometheus.io/path: "/metrics"
 ```
