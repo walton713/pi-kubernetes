@@ -197,6 +197,7 @@ resource "kubernetes_deployment_v1" "grafana" {
 
         volume {
           name = "grafana-nfs-pv"
+
           persistent_volume_claim {
             claim_name = "grafana-nfs-pvc"
           }
