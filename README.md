@@ -1,6 +1,15 @@
 # Home Server
 
-This README covers setting up the Walton Home Server on a Raspberry Pi running Ubuntu Server.
+This README covers setting up the Walton Home Server on any number of Raspberry Pi's running Ubuntu Server.
+
+## Building Nodes
+
+- Ensure that the IP of the Raspberry Pi to be used has been added to the `hosts` file inside the `ansible` directory.
+- From the `ansible` directory, run `make build`.
+
+## Managing Kubernetes
+
+- From the `ansible` directory, run `make k8s`.
 
 ## Current Domains
 
@@ -9,144 +18,44 @@ This README covers setting up the Walton Home Server on a Raspberry Pi running U
 | prometheus.local | The Prometheus UI        |
 | grafana.local    | The Grafana UI           |
 
-## Deploying Terraform
+## Current Kubernetes Namespaces and Workloads
 
-Ensure the kubeconfig for the server is at `~/.kube/config`
+### Storage
 
-```bash
-export KUBECONFIG=~/.kube/config
-cd terraform
-terraform plan -out out.tfplan
-terraform apply out.tfplan
-```
+The storage namespace includes the NFS server used for persistence throughout the kubernetes cluster.
 
-## Setting up a Pi as a server
+### Monitoring
 
-### Update system
+The monitoring namespace includes all workloads related to monitoring the health of the kubernetes cluster.
 
-```bash
-sudo apt upgrade
-sudo apt update
-sudo apt install zsh nfs-common
-```
+#### Prometheus
 
-### Install oh-my-zsh
+The Prometheus deployments are responsible for collecting metrics from the various workloads via endpoint scraping. These include:
 
-```bash
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-```
+- prometheus-prometheus-pushgateway
+- prometheus-kube-state-metrics
+- prometheus-server
 
-### Update .zshrc file
+#### Node Exporter
 
-Add the following plugins to the .zshrc file:
+The Node Exporter deamonset is responsible for getting metrics dealing with the Raspberry Pi's being used as nodes in the kubernetes cluster.
 
-- microk8s
+#### MySQL Exporter
 
-Change the ZSH_THEME to "clean"
+The MySQL Exporter deployment is responsible for getting metrics from the MySQL database.
 
-Add the following to the end of the file:
+#### Redis Exporter
 
-```bash
-export KUBECONFIG=~/.kube/config
-```
+The Redis Exporter deployment is responsible for getting metrics from the Redis cache.
 
-### Enable cgroups
+#### Grafana
 
-```bash
-sudo vi /boot/firmware/cmdline.txt
-```
+The Grafana deployment handles the visualization of the metrics via dashboards.
 
-add the following to the end of the line:
+### Database
 
-```code
-cgroup_enable=memory cgroup_memory=1
-```
+The database namespace includes the MySQL database for the cluster. A single instance of MySQL is used for all workloads within the cluster. Separation is made via individual databases and limited user access.
 
-### Mount external hdd
+### Caching
 
-```bash
-# Get the drive information
-lsblk -o NAME,FSTYPE,UUID
-
-# Add to fstab
-sudo vi /etc/fstab
-
-# Add this line with information for NAME
-# UUID=<UUID> /nfs <FSTYPE> defaults 0 0
-```
-
-### Install Node-Exporter
-
-Download
-
-```bash
-curl -SL https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-arm64.tar.gz > node_exporter.tar.gz && sudo tar -xvf node_exporter.tar.gz -C /usr/local/bin/ --strip-components=1
-```
-
-Create service file at `/etc/systemd/system/nodeexporter.service`
-
-```ini
-[Unit]
-Description=NodeExporter
-
-[Service]
-TimeoutStartSec=0
-ExecStart=/usr/local/bin/node_exporter
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Register the service
-
-```bash
-sudo systemctl daemon-reload \
-&& sudo systemctl enable nodeexporter \
-&& sudo systemctl start nodeexporter
-```
-
-### Install microk8s
-
-```bash
-sudo snap install microk8s --classic
-```
-
-### Add hal to microk8s group
-
-```bash
-sudo usermod -a -G microk8s hal
-```
-
-### Copy kubeconfig to home directory
-
-```bash
-mkdir ~/.kube
-mco > ~/.kube/config
-```
-
-### Enable Dashboard and Ingress
-
-```bash
-me dashboard ingress host-access
-```
-
-### Add storage label to master
-
-```bash
-microk8s.kubectl label node master hdd=enabled
-```
-
-### Add Prometheus metrics to Ingress Controller
-
-```bash
-microk8s.kubectl edit daemonset/nginx-ingress-microk8s-controller -n ingress
-```
-
-Add the following annotations to the pod template:
-
-```yml
-prometheus.io/scrape: "true"
-prometheus.io/scheme: "http"
-prometheus.io/port: "10254"
-prometheus.io/path: "/metrics"
-```
+The caching namespace includes the Redis cache. A single cache is used for the kubernetes cluster as a need for more is not currently expected.
