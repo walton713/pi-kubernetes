@@ -13,3 +13,7 @@
 # Python
 
 **/.venv/
+
+# VSCode
+
+**/.vscode/
