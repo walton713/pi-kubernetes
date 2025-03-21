@@ -6,7 +6,6 @@ This README covers setting up the Walton Home Server on a Raspberry Pi running U
 
 | Domain           | Description              |
 |------------------|--------------------------|
-| dashboard.local  | The Kubernetes Dashboard |
 | prometheus.local | The Prometheus UI        |
 | grafana.local    | The Grafana UI           |
 

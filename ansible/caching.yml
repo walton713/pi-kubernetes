@@ -1,0 +1,8 @@
+---
+
+- name: Manage Redis Cache
+  hosts: master
+  tasks:
+    - name: Manage Caching Namespace
+      ansible.builtin.include_role:
+        name: cache

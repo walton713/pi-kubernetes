@@ -1,0 +1,16 @@
+---
+
+- name: Manage NFS Storage
+  ansible.builtin.import_playbook: storage.yml
+
+- name: Manage K8s Monitoring
+  ansible.builtin.import_playbook: monitoring.yml
+
+- name: Manage MySQL Database
+  ansible.builtin.import_playbook: database.yml
+
+- name: Manage Redis Cache
+  ansible.builtin.import_playbook: caching.yml
+
+# - name: Manage MySQL Migrations
+#   ansible.builtin.import_playbook: migrations.yml

@@ -5,3 +5,15 @@
 **/*.tfplan
 **/*.tfstate
 **/*.tfstate.backup
+
+# Jetbrains
+
+**/.idea/
+
+# Python
+
+**/.venv/
+
+# VSCode
+
+**/.vscode/
