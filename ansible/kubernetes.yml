@@ -9,8 +9,5 @@
 - name: Manage MySQL Database
   ansible.builtin.import_playbook: database.yml
 
-- name: Manage Redis Cache
-  ansible.builtin.import_playbook: caching.yml
-
 # - name: Manage MySQL Migrations
 #   ansible.builtin.import_playbook: migrations.yml

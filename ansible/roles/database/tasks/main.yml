@@ -1,5 +1,10 @@
 ---
 
+- name: Create MySQL NFS Path
+  ansible.builtin.file:
+    state: directory
+    path: /nfs/mysql
+
 - name: Get Storage IP
   ansible.builtin.include_role:
     name: storage
@@ -144,26 +149,26 @@
         user: root
         pass: "{{ db_password }}"
 
-- name: Create Gitea Database
-  community.mysql.mysql_db:
-    state: present
-    name: gitea
-    login_host: localhost
-    login_port: 30306
-    login_user: root
-    login_password: "{{ db_password }}"
+# - name: Create Gitea Database
+#   community.mysql.mysql_db:
+#     state: present
+#     name: gitea
+#     login_host: localhost
+#     login_port: 30306
+#     login_user: root
+#     login_password: "{{ db_password }}"
 
-- name: Create Gitea User
-  community.mysql.mysql_user:
-    state: present
-    name: gitea
-    host: "%"
-    plugin: caching_sha2_password
-    plugin_auth_string: "{{ db_password }}"
-    salt: "{{ db_salt }}"
-    priv:
-      'gitea.*': 'ALL'
-    login_host: localhost
-    login_port: 30306
-    login_user: root
-    login_password: "{{ db_password }}"
+# - name: Create Gitea User
+#   community.mysql.mysql_user:
+#     state: present
+#     name: gitea
+#     host: "%"
+#     plugin: caching_sha2_password
+#     plugin_auth_string: "{{ db_password }}"
+#     salt: "{{ db_salt }}"
+#     priv:
+#       'gitea.*': 'ALL'
+#     login_host: localhost
+#     login_port: 30306
+#     login_user: root
+#     login_password: "{{ db_password }}"

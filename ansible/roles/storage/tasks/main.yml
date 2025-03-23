@@ -1,25 +1,5 @@
 ---
 
-- name: Create Prometheus NFS Path
-  ansible.builtin.file:
-    state: directory
-    path: /nfs/prom
-
-- name: Create Grafana NFS Path
-  ansible.builtin.file:
-    state: directory
-    path: /nfs/grafana
-
-- name: Create MySQL NFS Path
-  ansible.builtin.file:
-    state: directory
-    path: /nfs/mysql
-
-- name: Create Redis NFS Path
-  ansible.builtin.file:
-    state: directory
-    path: /nfs/redis
-
 - name: Add Storage Label to Master Node
   kubernetes.core.k8s:
     state: patched

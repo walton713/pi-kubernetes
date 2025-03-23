@@ -1,5 +1,15 @@
 ---
 
+- name: Create Prometheus NFS Path
+  ansible.builtin.file:
+    state: directory
+    path: /nfs/prom
+
+- name: Create Grafana NFS Path
+  ansible.builtin.file:
+    state: directory
+    path: /nfs/grafana
+
 - name: Get Storage IP
   ansible.builtin.include_role:
     name: storage
