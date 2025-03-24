@@ -1,0 +1,4 @@
+[master]
+192.168.0.102 ansible_user=hal
+
+[worker]

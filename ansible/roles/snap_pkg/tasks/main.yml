@@ -1,0 +1,10 @@
+---
+
+- name: Install Snap Packages
+  become: true
+  community.general.snap:
+    state: present
+    classic: "{{ classic }}"
+    dangerous: "{{ dangerous }}"
+    name: "{{ packages }}"
+    

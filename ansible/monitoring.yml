@@ -1,0 +1,8 @@
+---
+
+- name: Manage K8s Monitoring
+  hosts: master
+  tasks:
+    - name: Manage Monitoring Namespace
+      ansible.builtin.include_role:
+        name: monitoring

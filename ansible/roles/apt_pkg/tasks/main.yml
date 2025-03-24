@@ -1,0 +1,15 @@
+---
+
+- name: Update/Upgrade Dist
+  become: true
+  ansible.builtin.apt:
+    update_cache: true
+    upgrade: dist
+    cache_valid_time: 3600
+  when: upgrade
+
+- name: Install Apt Packages
+  become: true
+  ansible.builtin.apt:
+    state: present
+    pkg: "{{ packages }}"

@@ -1,0 +1,96 @@
+---
+
+- name: Copy Migrations
+  ansible.posix.synchronize:
+    src: /home/ben/Projects/server/migrations
+    dest: /home/hal
+    recursive: true
+    rsync_opts:
+      - -r
+      - --exclude=".idea/"
+      - --exclude=".venv/"
+
+- name: Get Migrations Hash
+  register: hash
+  ansible.builtin.shell: "find /home/hal/migrations/migrations -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | head -c 15"
+
+- name: Set Migration Image Name
+  ansible.builtin.set_fact:
+    image_name: migrations:{{ hash.stdout }}
+
+- name: Build Latest Migration
+  community.docker.docker_image:
+    state: present
+    source: build
+    build:
+      path: /home/hal/migrations
+    name: "{{ image_name }}"
+    repository: migrations:latest
+    force_tag: true
+    timeout: 600
+    archive_path: /home/hal/migrations.tar
+
+- name: Import Image Into microk8s
+  become: true
+  ansible.builtin.shell: "microk8s images import < /home/hal/migrations.tar"
+
+- name: Get All Migration Images
+  register: images
+  community.docker.docker_image_info:
+
+- name: Delete Old Migration Images
+  community.docker.docker_image_remove:
+    name: "{{ item.Id }}"
+  loop: "{{ images.images | default([]) }}"
+  when: item.RepoTags is search('migrations') and not 'migrations:latest' in item.RepoTags
+
+- name: Run Migrations
+  kubernetes.core.k8s:
+    state: present
+    wait: yes
+    wait_condition:
+      type: Complete
+      status: "True"
+    definition:
+      apiVersion: batch/v1
+      kind: Job
+      metadata:
+        name: migrations
+        namespace: database
+        labels:
+          app: migrations
+      spec:
+        completions: 1
+        ttlSecondsAfterFinished: 30
+        template:
+          metadata:
+            labels:
+              app: migrations
+          spec:
+            restartPolicy: Never
+            containers:
+              - name: migrations
+                image: "{{ image_name }}"
+                imagePullPolicy: Never
+                command:
+                  - yoyo
+                  - apply
+                  - -c
+                  - yoyo.ini
+                  - -d
+                  - mysql://root:{{ db_password }}@mysql:3306/mysql
+
+- name: Get microk8s Image List
+  become: true
+  register: images
+  ansible.builtin.shell: "microk8s ctr images ls -q"
+
+- name: Remove Old Migrations Images From microk8s
+  ansible.builtin.shell: "microk8s ctr images rm {{ item }}"
+  loop: "{{ images.stdout_lines | default([]) }}"
+  when: item is search('migrations') and not item is search(image_name)
+
+- name: Delete Migrations Directory
+  ansible.builtin.file:
+    state: absent
+    path: /home/hal/migrations

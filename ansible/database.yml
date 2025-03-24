@@ -1,0 +1,8 @@
+---
+
+- name: Manage MySQL Database
+  hosts: master
+  tasks:
+    - name: Manage Database Namespace
+      ansible.builtin.include_role:
+        name: database
