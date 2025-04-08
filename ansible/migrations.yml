@@ -5,4 +5,5 @@
   tasks:
     - name: Manage Database Migrations
       ansible.builtin.include_role:
-        name: migrations
+        name: database
+        tasks_from: migrations

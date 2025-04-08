@@ -1,3 +1,0 @@
-cryptography==38.0.4
-PyMySQL==1.1.1
-yoyo-migrations==9.0.0

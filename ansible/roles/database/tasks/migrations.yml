@@ -1,0 +1,46 @@
+---
+
+# API
+
+- name: Create Api Database
+  community.mysql.mysql_db:
+    state: present
+    name: api
+    login_host: localhost
+    login_port: 30306
+    login_user: root
+    login_password: "{{ db_password }}"
+
+- name: Create Api Database User
+  community.mysql.mysql_user:
+    state: present
+    name: api
+    host: "%"
+    plugin: caching_sha2_password
+    plugin_auth_string: "{{ db_password }}"
+    salt: "{{ db_salt }}"
+    priv:
+      'api.*': 'ALL'
+    login_host: localhost
+    login_port: 30306
+    login_user: root
+    login_password: "{{ db_password }}"
+
+- name: Add LocalWeatherObservations Table
+  community.mysql.mysql_query:
+    login_host: localhost
+    login_port: 30306
+    login_user: root
+    login_password: "{{ db_password }}"
+    login_db: api
+    query: |
+      CREATE TABLE IF NOT EXISTS `LocalWeatherObservations` (
+        `Id` BINARY(16) DEFAULT (RANDOM_BYTES(16)) NOT NULL PRIMARY KEY,
+        `Date` DATE NOT NULL,
+        `Created` DATETIME(6) NOT NULL,
+        `Updated` DATETIME(6) NOT NULL,
+        `Precipitation` DECIMAL(5,2) NOT NULL,
+        `Snow` DECIMAL(5,2) NOT NULL,
+        `TracePrecipitation` BOOL NOT NULL,
+        `TraceSnow` BOOL NOT NULL
+      )

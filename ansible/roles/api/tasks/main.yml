@@ -1,0 +1,176 @@
+---
+
+- name: Copy Api
+  ansible.posix.synchronize:
+    src: /Users/ben/Projects/pi/api/Home.Api
+    dest: /home/hal
+    recursive: true
+    rsync_opts:
+      - -r
+      - --exclude=".idea/"
+      - --exclude=".git/"
+
+- name: Get Hash
+  register: hash
+  ansible.builtin.shell: "find /home/hal/Home.Api -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | head -c 15"
+
+- name: Store Hash
+  ansible.builtin.copy:
+    content: "{{ hash.stdout }}"
+    dest: /home/hal/api_hash.txt
+
+- name: Set Image Name
+  ansible.builtin.set_fact:
+    image_name: api:{{ hash.stdout }}
+
+- name: Build Latest
+  community.docker.docker_image:
+    state: present
+    source: build
+    build:
+      path: /home/hal/Home.Api
+    name: "{{ image_name }}"
+    repository: api:latest
+    force_tag: true
+    timeout: 600
+    archive_path: /home/hal/api.tar
+
+- name: Import Image Into microk8s
+  become: true
+  ansible.builtin.shell: "microk8s images import < /home/hal/api.tar"
+
+- name: Get All Docker Images
+  register: images
+  community.docker.docker_image_info:
+
+- name: Delete Old Api Images
+  community.docker.docker_image_remove:
+    name: "{{ item.Id }}"
+  loop: "{{ images.images | d([]) }}"
+  when: item.RepoTags is search('api') and not 'api:latest' in item.RepoTags
+
+# - name: Get microk8s Image List
+#   become: true
+#   register: images
+#   ansible.builtin.shell: "microk8s ctr images ls -q | grep api"
+
+# - name: Remove Old Api Images From microk8s
+#   become: true
+#   ansible.builtin.shell: "microk8s ctr images rm {{ item }}"
+#   loop: "{{ images.stdout_lines | d([]) }}"
+#   when: item is search('api') and not item is search(image_name)
+
+- name: Delete Api Image Tar
+  ansible.builtin.file:
+    state: absent
+    path: /home/hal/api.tar
+
+- name: Delete Api Directory
+  ansible.builtin.file:
+    state: absent
+    path: /home/hal/Home.Api
+
+- name: Create Api Namespace
+  kubernetes.core.k8s:
+    state: present
+    api_version: v1
+    kind: Namespace
+    name: api
+
+- name: Create Api Deployment
+  kubernetes.core.k8s:
+    state: present
+    wait: yes
+    wait_condition:
+      type: Available
+      status: "True"
+      reason: MinimumReplicasAvailable
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: api
+        namespace: api
+        labels:
+          app: api
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: api
+        template:
+          metadata:
+            labels:
+              app: api
+          spec:
+            containers:
+              - name: api
+                image: "{{ image_name }}"
+                imagePullPolicy: Never
+                env:
+                  - name: ASPNETCORE_ENVIRONMENT
+                    value: Development
+                  - name: ASPNETCORE_URLS
+                    value: http://+:5000
+                  - name: DB_CONNECTION
+                    value: "Server=mysql.database; Database=api; Uid=api; Pwd={{ db_password }}"
+                ports:
+                  - containerPort: 5000
+                livenessProbe:
+                  httpGet:
+                    port: 5000
+                    path: /health/live
+                  initialDelaySeconds: 30
+                readinessProbe:
+                  httpGet:
+                    port: 5000
+                    path: /health/ready
+                  initialDelaySeconds: 30
+
+
+- name: Create Api Service
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: api
+        namespace: api
+        labels:
+          app: api
+      spec:
+        selector:
+          app: api
+        type: NodePort
+        ports:
+          - name: api
+            protocol: TCP
+            port: 5000
+            targetPort: 5000
+            nodePort: 30000
+
+- name: Create Api Ingress
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      metadata:
+        name: api
+        namespace: api
+        annotations:
+          kubernetes.io/ingress-class: nginx
+      spec:
+        ingressClassName: nginx
+        rules:
+          - host: api.local
+            http:
+              paths:
+                - path: /
+                  pathType: Prefix
+                  backend:
+                    service:
+                      name: api
+                      port:
+                        number: 5000

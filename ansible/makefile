@@ -1,17 +1,23 @@
+api:
+	ansible-playbook -vJK api.yml
+
 build:
-	ansible-playbook -vK build.yml
+	ansible-playbook -vJK build.yml
+
+cleanup:
+	ansible-playbook -vJK cleanup_microk8s.yml
 
 database:
-	ansible-playbook -vJK database.yml
+	ansible-playbook -vJ database.yml
 
 k8s:
 	ansible-playbook -vJK kubernetes.yml
 
 migrations:
-	ansible-playbook -vJK migrations.yml
+	ansible-playbook -vJ migrations.yml
 
 monitoring:
-	ansible-playbook -v monitoring.yml
+	ansible-playbook -vJ monitoring.yml
 
 storage:
-	ansible-playbook -v storage.yml
+	ansible-playbook -vJ storage.yml

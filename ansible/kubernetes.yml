@@ -9,5 +9,8 @@
 - name: Manage MySQL Database
   ansible.builtin.import_playbook: database.yml
 
-# - name: Manage MySQL Migrations
-#   ansible.builtin.import_playbook: migrations.yml
+- name: Manage MySQL Migrations
+  ansible.builtin.import_playbook: migrations.yml
+
+- name: Manage Api
+  ansible.builtin.import_playbook: api.yml
