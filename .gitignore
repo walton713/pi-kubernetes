@@ -9,6 +9,8 @@
 # Jetbrains
 
 **/.idea/
+**/bin/
+**/obj/
 
 # Python
 

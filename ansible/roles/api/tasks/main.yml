@@ -2,17 +2,19 @@
 
 - name: Copy Api
   ansible.posix.synchronize:
-    src: /Users/ben/Projects/pi/api/Home.Api
+    src: /mnt/c/Users/walto/Documents/Projects/pi-kubernetes/HomeApi
     dest: /home/hal
     recursive: true
     rsync_opts:
       - -r
       - --exclude=".idea/"
       - --exclude=".git/"
+      - --exclude="HomeApi/bin/"
+      - --exclude="HomeApi/obj/"
 
 - name: Get Hash
   register: hash
-  ansible.builtin.shell: "find /home/hal/Home.Api -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | head -c 15"
+  ansible.builtin.shell: "find /home/hal/HomeApi -type f -print0 | sort -z | xargs -0 sha1sum | sha1sum | head -c 15"
 
 - name: Store Hash
   ansible.builtin.copy:
@@ -28,7 +30,8 @@
     state: present
     source: build
     build:
-      path: /home/hal/Home.Api
+      path: /home/hal/HomeApi
+      dockerfile: HomeApi/Dockerfile
     name: "{{ image_name }}"
     repository: api:latest
     force_tag: true
@@ -109,7 +112,7 @@
                 imagePullPolicy: Never
                 env:
                   - name: ASPNETCORE_ENVIRONMENT
-                    value: Development
+                    value: Production
                   - name: ASPNETCORE_URLS
                     value: http://+:5000
                   - name: DB_CONNECTION

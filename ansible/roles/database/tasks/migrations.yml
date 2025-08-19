@@ -37,8 +37,8 @@
       CREATE TABLE IF NOT EXISTS `LocalWeatherObservations` (
         `Id` BINARY(16) DEFAULT (RANDOM_BYTES(16)) NOT NULL PRIMARY KEY,
         `Date` DATE NOT NULL,
-        `Created` DATETIME(6) NOT NULL,
-        `Updated` DATETIME(6) NOT NULL,
+        `Created` DATETIME(6) DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
+        `Updated` DATETIME(6) DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
         `Precipitation` DECIMAL(5,2) NOT NULL,
         `Snow` DECIMAL(5,2) NOT NULL,
         `TracePrecipitation` BOOL NOT NULL,
