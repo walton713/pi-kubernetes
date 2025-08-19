@@ -1,0 +1,13 @@
+# NODE
+
+node_modules
+dist
+out-tsc
+.angular
+.cache
+.tmp
+
+# IDE
+
+.vscode
+.idea

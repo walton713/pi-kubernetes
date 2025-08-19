@@ -14,3 +14,6 @@
 
 - name: Manage Api
   ansible.builtin.import_playbook: api.yml
+
+- name: Manage App
+  ansible.builtin.import_playbook: app.yml

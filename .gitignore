@@ -19,3 +19,35 @@
 # VSCode
 
 **/.vscode/
+
+# Compiled output
+**/dist
+**/tmp
+**/out-tsc
+**/bazel-out
+
+# Node
+**/node_modules
+**/npm-debug.log
+**/yarn-error.log
+
+# IDEs and editors
+**/.project
+**/.classpath
+**/.c9/
+**/*.launch
+**/.settings/
+**/*.sublime-workspace
+
+# Miscellaneous
+**/.angular/cache
+**/.sass-cache/
+**/connect.lock
+**/coverage
+**/libpeerconnection.log
+**/testem.log
+**/typings
+
+# System files
+**/.DS_Store
+**/Thumbs.db

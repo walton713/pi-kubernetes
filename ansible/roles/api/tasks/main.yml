@@ -71,7 +71,7 @@
 - name: Delete Api Directory
   ansible.builtin.file:
     state: absent
-    path: /home/hal/Home.Api
+    path: /home/hal/HomeApi
 
 - name: Create Api Namespace
   kubernetes.core.k8s:

@@ -1,6 +1,9 @@
 api:
 	ansible-playbook -vJK api.yml
 
+app:
+	ansible-playbook -vJK app.yml
+
 build:
 	ansible-playbook -vJK build.yml
 
