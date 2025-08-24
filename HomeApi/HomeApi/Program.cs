@@ -76,6 +76,31 @@ builder.Services.AddAutoMapper(cfg => { }, AppDomain.CurrentDomain.GetAssemblies
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<ApiDbContext>("Database", HealthStatus.Degraded);
 
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("MyCorsPolicy", builder =>
+        {
+            builder.WithOrigins("http://localhost:4200")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+    });
+}
+else
+{
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy("MyCorsPolicy", builder =>
+        {
+            builder.WithOrigins("http://home.local")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+    });
+}
+
 var app = builder.Build();
 
 app.MapHealthChecks("/health/ready", new HealthCheckOptions
@@ -107,6 +132,8 @@ if (app.Environment.IsDevelopment())
         throw;
     }
 }
+
+app.UseCors("MyCorsPolicy");
 
 await app.RunAsync();
 

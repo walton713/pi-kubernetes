@@ -30,7 +30,7 @@
         update_cache: true
         upgrade: dist
         cache_valid_time: 3600
-      when: inventory_hostname in groups['worker']
+      when: inventory_hostname in groups['workers']
 
     - name: Install Helm
       ansible.builtin.include_role:

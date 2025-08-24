@@ -5,10 +5,10 @@ app:
 	ansible-playbook -vJK app.yml
 
 build:
-	ansible-playbook -vJK build.yml
+	ansible-playbook -vJK build.yml -i hosts
 
 cleanup:
-	ansible-playbook -vJK cleanup_microk8s.yml
+	ansible-playbook -vJK cleanup_microk8s.yml -i hosts
 
 database:
 	ansible-playbook -vJ database.yml

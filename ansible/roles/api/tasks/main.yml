@@ -1,5 +1,17 @@
 ---
 
+- name: Add Worker Label to Worker Nodes
+  kubernetes.core.k8s:
+    state: patched
+    kind: Node
+    name: "{{ item }}"
+    definition:
+      metadata:
+        labels:
+          node-role.kubernetes.io/worker: ""
+  loop:
+    - worker1
+
 - name: Copy Api
   ansible.posix.synchronize:
     src: /mnt/c/Users/walto/Documents/Projects/pi-kubernetes/HomeApi
@@ -106,6 +118,8 @@
             labels:
               app: api
           spec:
+            nodeSelector:
+              node-role.kubernetes.io/worker: ""
             containers:
               - name: api
                 image: "{{ image_name }}"

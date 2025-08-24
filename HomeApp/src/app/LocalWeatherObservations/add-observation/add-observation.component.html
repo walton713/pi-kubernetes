@@ -1,0 +1,20 @@
+<form [formGroup]="observationForm" (ngSubmit)="onSubmit()">
+  <mat-form-field>
+    <mat-label>Date</mat-label>
+    <input matInput formControlName="date" [matDatepicker]="picker">
+    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Precipitation</mat-label>
+    <input matInput formControlName="precipitation" [step]="0.01">
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>Snow</mat-label>
+    <input matInput formControlName="snow" [step]="0.01">
+  </mat-form-field>
+  <mat-slide-toggle formControlName="tracePrecipitation">Trace Precipitation</mat-slide-toggle>
+  <mat-slide-toggle formControlName="traceSnow">Trace Snow</mat-slide-toggle>
+  <button matButton type="submit">Add Observation</button>
+</form>
+
