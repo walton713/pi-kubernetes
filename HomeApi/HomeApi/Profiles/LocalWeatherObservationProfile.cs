@@ -8,7 +8,7 @@ public class LocalWeatherObservationProfile : Profile
 {
     public LocalWeatherObservationProfile()
     {
-        CreateMap<AddLocalWeatherObservationDto, LocalWeatherObservation>()
+        CreateMap<AddEditLocalWeatherObservationDto, LocalWeatherObservation>()
             .ForMember(d => d.Id, o => o.MapFrom(_ => Guid.NewGuid()))
             .ForMember(d => d.Created, o => o.MapFrom(_ => DateTimeOffset.UtcNow.UtcDateTime))
             .ForMember(d => d.Updated, o => o.MapFrom(_ => DateTimeOffset.UtcNow.UtcDateTime));
@@ -17,25 +17,21 @@ public class LocalWeatherObservationProfile : Profile
             .ForMember(d => d.Id, o => o.MapFrom(s => s.Id.ToString()))
             .ForMember(d => d.Date, o => o.MapFrom(s => s.Date.ToString("O")))
             .ForMember(d => d.Created, o => o.MapFrom(s => s.Created.ToString("u")))
-            .ForMember(d => d.Updated, o => o.MapFrom(s => s.Updated.ToString("u")));
-
-        CreateMap<LocalWeatherObservation, LocalWeatherObservationsFriendlyDto>()
-            .ForMember(d => d.Id, o => o.MapFrom(s => s.Id.ToString()))
-            .ForMember(d => d.Date, o => o.MapFrom(s => s.Date.ToString("O")))
-            .ForMember(d => d.Precipitation, o => o.MapFrom<PrecipitationToStringResolver>())
-            .ForMember(d => d.Snow, o => o.MapFrom<SnowToStringResolver>());
+            .ForMember(d => d.Updated, o => o.MapFrom(s => s.Updated.ToString("u")))
+            .ForMember(d => d.PrecipitationString, o => o.MapFrom<PrecipitationToStringResolver>())
+            .ForMember(d => d.SnowString, o => o.MapFrom<SnowToStringResolver>());
     }
 
-    private sealed class PrecipitationToStringResolver : IValueResolver<LocalWeatherObservation, LocalWeatherObservationsFriendlyDto, string>
+    private sealed class PrecipitationToStringResolver : IValueResolver<LocalWeatherObservation, LocalWeatherObservationDto, string>
     {
-        public string Resolve(LocalWeatherObservation source, LocalWeatherObservationsFriendlyDto destination,
+        public string Resolve(LocalWeatherObservation source, LocalWeatherObservationDto destination,
             string destMember, ResolutionContext context) =>
             source.TracePrecipitation ? "T" : $"{source.Precipitation:0.##}\"";
     }
 
-    private sealed class SnowToStringResolver : IValueResolver<LocalWeatherObservation, LocalWeatherObservationsFriendlyDto, string>
+    private sealed class SnowToStringResolver : IValueResolver<LocalWeatherObservation, LocalWeatherObservationDto, string>
     {
-        public string Resolve(LocalWeatherObservation source, LocalWeatherObservationsFriendlyDto destination,
+        public string Resolve(LocalWeatherObservation source, LocalWeatherObservationDto destination,
             string destMember, ResolutionContext context) =>
             source.TraceSnow ? "T" : $"{source.Snow:0.##}\"";
     }

@@ -4,6 +4,7 @@ import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import {provideHttpClient} from '@angular/common/http';
 import {provideNativeDateAdapter} from '@angular/material/core';
+import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -11,6 +12,6 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
-    provideNativeDateAdapter()
+    provideNativeDateAdapter(), provideCharts(withDefaultRegisterables())
   ]
 };

@@ -1,10 +1,11 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import {AddObservationComponent} from './LocalWeatherObservations/add-observation/add-observation.component';
+import { HeaderComponent } from './Shared/header/header.component';
+import {FooterComponent} from './Shared/footer/footer.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, AddObservationComponent],
+  imports: [RouterOutlet, HeaderComponent, FooterComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

@@ -3,7 +3,7 @@ using HomeApi.Models.LocalWeatherObservations;
 
 namespace HomeApi.Validators;
 
-public class AddLocalWeatherObservationDtoValidator : AbstractValidator<AddLocalWeatherObservationDto>
+public class AddLocalWeatherObservationDtoValidator : AbstractValidator<AddEditLocalWeatherObservationDto>
 {
     public AddLocalWeatherObservationDtoValidator()
     {

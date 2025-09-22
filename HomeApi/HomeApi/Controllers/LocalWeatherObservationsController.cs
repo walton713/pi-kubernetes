@@ -3,7 +3,6 @@ using HomeApi.Database.Entities;
 using HomeApi.Database.Repositories;
 using HomeApi.Models.LocalWeatherObservations;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Net.Http.Headers;
 
 namespace HomeApi.Controllers;
 
@@ -12,41 +11,54 @@ namespace HomeApi.Controllers;
 public class LocalWeatherObservationsController(ILocalWeatherObservationRepository repository, IMapper mapper)  : ControllerBase
 {
     [HttpPost]
-    [Produces("application/json", "application/vnd.friendly+json")]
-    public async Task<IActionResult> AddLocalWeatherObservation(AddLocalWeatherObservationDto observation, [FromHeader(Name = "Accept")] string? mediaType = "application/json")
+    [Produces("application/json")]
+    public async Task<IActionResult> AddEditLocalWeatherObservation(AddEditLocalWeatherObservationDto observation)
     {
-        MediaTypeHeaderValue.TryParse(mediaType, out var parsedMediaType);
         var observationEntity = mapper.Map<LocalWeatherObservation>(observation);
+        if (observation.Id.HasValue)
+        {
+            if (await repository.GetLocalWeatherObservationByIdAsync(observation.Id.Value) is null)
+            {
+                return NotFound();
+            }
+
+            await repository.UpdateLocalWeatherObservationAsync(observationEntity);
+            return NoContent();
+        }
         await  repository.AddLocalWeatherObservationAsync(observationEntity);
 
-        return parsedMediaType!.SubTypeWithoutSuffix.EndsWith("friendly", StringComparison.InvariantCultureIgnoreCase)
-            ? CreatedAtRoute("GetLocalWeatherObservationById", new { id = observationEntity.Id }, mapper.Map<LocalWeatherObservationsFriendlyDto>(observationEntity))
-            : CreatedAtRoute("GetLocalWeatherObservationById", new { id = observationEntity.Id }, mapper.Map<LocalWeatherObservationDto>(observationEntity));
+        return CreatedAtRoute("GetLocalWeatherObservationById", new { id = observationEntity.Id }, mapper.Map<LocalWeatherObservationDto>(observationEntity));
     }
 
     [HttpGet]
-    [Produces("application/json", "application/vnd.friendly+json")]
-    public async Task<IActionResult> GetLocalWeatherObservationsAsync([FromHeader(Name = "Accept")] string? mediaType = "application/json")
+    [Produces("application/json")]
+    public async Task<IActionResult> GetLocalWeatherObservationsAsync(int limit = 10, int offset = 1)
     {
-        MediaTypeHeaderValue.TryParse(mediaType, out var parsedMediaType);
-        var observations = await repository.GetLocalWeatherObservationsAsync();
+        var observations = await repository.GetLocalWeatherObservationsAsync(limit, offset);
 
-        return parsedMediaType!.SubTypeWithoutSuffix.EndsWith("friendly", StringComparison.InvariantCultureIgnoreCase)
-            ? Ok(mapper.Map<IEnumerable<LocalWeatherObservationsFriendlyDto>>(observations))
-            : Ok(mapper.Map<IEnumerable<LocalWeatherObservationDto>>(observations));
+        return Ok(mapper.Map<IEnumerable<LocalWeatherObservationDto>>(observations));
     }
 
     [HttpGet("{id:guid}", Name = "GetLocalWeatherObservationById")]
-    [Produces("application/json", "application/vnd.friendly+json")]
-    public async Task<IActionResult> GetLocalWeatherObservationByIdAsync(Guid id, [FromHeader(Name = "Accept")] string? mediaType = "application/json")
+    [Produces("application/json")]
+    public async Task<IActionResult> GetLocalWeatherObservationByIdAsync(Guid id)
     {
-        MediaTypeHeaderValue.TryParse(mediaType, out var parsedMediaType);
         var observation = await repository.GetLocalWeatherObservationByIdAsync(id);
 
         if (observation == null) return NotFound();
 
-        return parsedMediaType!.SubTypeWithoutSuffix.EndsWith("friendly", StringComparison.InvariantCultureIgnoreCase)
-            ? Ok(mapper.Map<LocalWeatherObservationsFriendlyDto>(observation))
-            : Ok(mapper.Map<LocalWeatherObservationDto>(observation));
+        return Ok(mapper.Map<LocalWeatherObservationDto>(observation));
+    }
+
+    [HttpGet("summaries")]
+    [Produces("application/json")]
+    public async Task<IActionResult> GetLocalWeatherObservationSummariesAsync(bool? yearToDate, int? days)
+    {
+        if (!(yearToDate.HasValue || days.HasValue))
+        {
+            return StatusCode(StatusCodes.Status406NotAcceptable);
+        }
+
+        return Ok(await repository.GetLocalWeatherObservationSummariesAsync(yearToDate, days));
     }
 }

@@ -115,6 +115,10 @@
             app: api
         template:
           metadata:
+            annotations:
+              prometheus.io/scrape: "true"
+              prometheus.io/path: "/metrics"
+              prometheus.io/port: "5000"
             labels:
               app: api
           spec:

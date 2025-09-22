@@ -12,6 +12,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Newtonsoft.Json.Serialization;
+using OpenTelemetry.Metrics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -69,12 +70,25 @@ else
 }
 
 builder.Services.AddScoped<ILocalWeatherObservationRepository, LocalWeatherObservationRepository>();
-builder.Services.AddScoped<IValidator<AddLocalWeatherObservationDto>, AddLocalWeatherObservationDtoValidator>();
+builder.Services.AddScoped<IValidator<AddEditLocalWeatherObservationDto>, AddLocalWeatherObservationDtoValidator>();
 
 builder.Services.AddAutoMapper(cfg => { }, AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddHealthChecks()
     .AddDbContextCheck<ApiDbContext>("Database", HealthStatus.Degraded);
+
+builder.Services.AddOpenTelemetry()
+    .WithMetrics(b =>
+    {
+        b.AddPrometheusExporter();
+        b.AddMeter("Microsoft.AspNetCore.Hosting",
+                   "Microsoft.AspNetCore.Server.Kestrel");
+        b.AddView("http.server.request.duration",
+            new ExplicitBucketHistogramConfiguration
+            {
+                Boundaries = [0, 0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1, 2.5, 5, 7.5, 10]
+            });
+    });
 
 if (builder.Environment.IsDevelopment())
 {
@@ -103,14 +117,15 @@ else
 
 var app = builder.Build();
 
+app.MapPrometheusScrapingEndpoint();
 app.MapHealthChecks("/health/ready", new HealthCheckOptions
-{
-    Predicate = check => check.Tags.Contains("ready")
-});
+    {
+        Predicate = check => check.Tags.Contains("ready")
+    });
 app.MapHealthChecks("/health/live", new HealthCheckOptions
-{
-    Predicate = _ => false
-});
+    {
+        Predicate = _ => false
+    });
 
 app.MapControllers();
 
@@ -125,6 +140,7 @@ if (app.Environment.IsDevelopment())
         var context = scope.ServiceProvider.GetRequiredService<ApiDbContext>();
         await context.Database.EnsureDeletedAsync();
         await context.Database.EnsureCreatedAsync();
+        Data.SeedDatabase(context);
     }
     catch (Exception e)
     {

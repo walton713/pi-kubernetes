@@ -1,0 +1,32 @@
+.footer {
+  background: var(--primary-color-dark);
+}
+
+.footer-grid {
+  display: grid;
+  gap: 2em;
+  grid-template-areas: "copyright"
+                       "links";
+}
+
+.copyright {
+  grid-area: copyright;
+  color: white;
+  margin: 0 auto;
+}
+
+.footer-links {
+  grid-area: links;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+}
+
+@media (width >= 600px) {
+  .footer-links {
+    flex-direction: row;
+    justify-content: center;
+    gap: 4em;
+  }
+}

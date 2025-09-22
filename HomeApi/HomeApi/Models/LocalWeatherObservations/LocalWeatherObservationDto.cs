@@ -17,4 +17,8 @@ public class LocalWeatherObservationDto
     public bool TracePrecipitation { get; set; }
 
     public bool TraceSnow { get; set; }
+
+    public string PrecipitationString { get; set; }
+
+    public string SnowString { get; set; }
 }

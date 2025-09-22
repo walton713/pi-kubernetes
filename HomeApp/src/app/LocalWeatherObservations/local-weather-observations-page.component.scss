@@ -1,0 +1,45 @@
+.observations-page {
+  padding-top: 2em;
+}
+
+.add-observation {
+  padding: 1em 0;
+  grid-column: 2 / 6;
+}
+
+.add-observation-button {
+  background: var(--primary-color-dark);
+  color: var(--secondary-color-dark);
+}
+
+.observation-table * {
+  color: var(--primary-color-dark);
+}
+
+.observation-table th {
+  vertical-align: bottom;
+}
+
+.observation-table td {
+  vertical-align: middle;
+}
+
+@media (width >= 600px) {
+  .observations-page {
+    padding-top: 3em;
+  }
+
+  .add-observation-button {
+    grid-column: 2 / 4;
+  }
+
+  .observation-graphs {
+    grid-column: span 6;
+    grid-row: 3 / 4;
+  }
+
+  .observation-table {
+    grid-column: span 6;
+    grid-row: 3 / 4;
+  }
+}

@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
-import { ILocalWeatherObservationFriendly } from '../observations.model';
-import { ObservationsService } from '../observations.service';
+import { ILocalWeatherObservation } from '../observations.model';
 import { MatTableModule } from '@angular/material/table';
 import { DatePipe } from '@angular/common';
 import { Observable } from 'rxjs';
@@ -16,7 +15,7 @@ import {ObservationsStore} from '../observations.store';
   styleUrl: './observations-list.component.scss'
 })
 export class ObservationsListComponent {
-  observations$: Observable<ILocalWeatherObservationFriendly[]>;
+  observations$: Observable<ILocalWeatherObservation[]>;
   columnsToDisplay: string[] = ['Date', 'Precipitation', 'Snow'];
 
   constructor(private observationsStore: ObservationsStore) {

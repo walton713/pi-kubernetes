@@ -1,0 +1,43 @@
+<section class="max-width-container gray-background local-observations">
+  <div class="section-grid max-width">
+    <h2 class="local-observations-heading">Local Observations</h2>
+    <div class="local-observations-graph-ytd">
+      <h3>Year-To-Date</h3>
+      @if (ytdLoading) {
+        <mat-spinner class="spinner"></mat-spinner>
+      } @else {
+        <app-cumulative-chart [data]="ytdPrecipitation"
+                              [cumulativeData]="ytdCumulativePrecipitation"
+                              [labels]="ytdLabels"
+                              [dataLabel]="'Precipitation'"
+                              [cumulativeDataLabel]="'Cumulative Precipitation'">
+        </app-cumulative-chart>
+        <app-cumulative-chart [data]="ytdSnow"
+                              [cumulativeData]="ytdCumulativeSnow"
+                              [labels]="ytdLabels"
+                              [dataLabel]="'Snow'"
+                              [cumulativeDataLabel]="'Cumulative Snow'">
+        </app-cumulative-chart>
+      }
+    </div>
+    <div class="local-observations-graph-month">
+      <h3>Past Month</h3>
+      @if (monthLoading) {
+        <mat-spinner class="spinner"></mat-spinner>
+      } @else {
+        <app-cumulative-chart [data]="monthPrecipitation"
+                              [cumulativeData]="monthCumulativePrecipitation"
+                              [labels]="monthLabels"
+                              [dataLabel]="'Precipitation'"
+                              [cumulativeDataLabel]="'Cumulative Precipitation'">
+        </app-cumulative-chart>
+        <app-cumulative-chart [data]="monthSnow"
+                              [cumulativeData]="monthCumulativeSnow"
+                              [labels]="monthLabels"
+                              [dataLabel]="'Snow'"
+                              [cumulativeDataLabel]="'Cumulative Snow'">
+        </app-cumulative-chart>
+      }
+    </div>
+  </div>
+</section>

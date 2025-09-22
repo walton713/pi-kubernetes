@@ -1,7 +1,9 @@
 namespace HomeApi.Models.LocalWeatherObservations;
 
-public class AddLocalWeatherObservationDto
+public class AddEditLocalWeatherObservationDto
 {
+    public Guid? Id { get; set; }
+
     public DateOnly Date { get; set; }
 
     public decimal Precipitation { get; set; }
