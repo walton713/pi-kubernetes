@@ -2,4 +2,4 @@
 192.168.0.102 ansible_user=hal
 
 [workers]
-192.168.0.106 ansible_user=hal
+192.168.0.103 ansible_user=hal

@@ -17,3 +17,6 @@
 
 - name: Manage App
   ansible.builtin.import_playbook: app.yml
+
+- name: Manage Queue
+  ansible.builtin.import_playbook: queue.yml

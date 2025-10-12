@@ -22,5 +22,8 @@ migrations:
 monitoring:
 	ansible-playbook -vJ monitoring.yml
 
+queue:
+	ansible-playbook -vJ queue.yml
+
 storage:
 	ansible-playbook -vJ storage.yml
