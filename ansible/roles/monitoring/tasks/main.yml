@@ -1,5 +1,17 @@
 ---
 
+- name: Add Master Label to Master Node
+  kubernetes.core.k8s:
+    state: patched
+    kind: Node
+    name: "{{ item }}"
+    definition:
+      metadata:
+        labels:
+          node-role.kubernetes.io/master: ""
+  loop:
+    - master
+
 - name: Create Prometheus NFS Path
   ansible.builtin.file:
     state: directory
@@ -121,6 +133,22 @@
       alertmanager:
         enabled: false
 
+- name: Install Prometheus Operator Helm Chart
+  kubernetes.core.helm:
+    state: present
+    wait: true
+    update_repo_cache: true
+    name: prometheus-operator
+    namespace: monitoring
+    chart_ref: prometheus-community/kube-prometheus-stack
+    values:
+      kubeStateMetrics:
+        enabled: false
+      nodeExporter:
+        enabled: false
+      grafana:
+        enabled: false
+
 - name: Create Grafana PersistentVolume
   kubernetes.core.k8s:
     state: present
@@ -182,6 +210,10 @@
     namespace: monitoring
     chart_ref: grafana/grafana
     values:
+      initChownData:
+        enabled: false
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
       rbac:
         create: false
       serviceAccount:

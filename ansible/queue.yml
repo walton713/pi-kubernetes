@@ -1,0 +1,8 @@
+---
+
+- name: Manage Queue
+  hosts: master
+  tasks:
+    - name: Manage Queue Namespace
+      ansible.builtin.include_role:
+        name: queue
