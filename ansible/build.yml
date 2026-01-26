@@ -1,0 +1,131 @@
+---
+
+- name: Update Nodes
+  hosts: all
+  tasks:
+    - name: Update/Upgrade Apt Packages
+      become: true
+      ansible.builtin.apt:
+        upgrade: dist
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Install Common Packages
+      become: true
+      ansible.builtin.apt:
+        state: present
+        pkg:
+          - nfs-common
+          - python3
+          - python3-pip
+          - docker.io
+          - docker-compose
+
+- name: Configure Master1
+  hosts: master1
+  vars:
+    workers:
+      - name: worker1
+        ip: "192.168.0.108"
+  tasks:
+    - name: Install Helm
+      become: true
+      community.general.snap:
+        state: present
+        classic: true
+        name: helm
+
+    - name: Create HDD Path
+      become: true
+      ansible.builtin.file:
+        state: directory
+        path: /mnt/data
+        owner: nobody
+        group: nogroup
+        mode: '0777'
+
+    - name: Mount HDD
+      become: true
+      ansible.builtin.lineinfile:
+        state: present
+        path: /etc/fstab
+        search_string: 52ec3ffb-c7db-4bdc-ada3-a4134755ad74
+        line: UUID=52ec3ffb-c7db-4bdc-ada3-a4134755ad74 /mnt/data ext4 defaults 0 0
+
+    - name: Start Docker Service
+      become: true
+      ansible.builtin.systemd_service:
+        state: started
+        enabled: true
+        service: docker
+
+    - name: Add Docker Group
+      become: true
+      ansible.builtin.group:
+        state: present
+        name: docker
+
+    - name: Add User to Docker Group
+      become: true
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: true
+
+    - name: Add Worker Nodes to Hosts File
+      become: true
+      ansible.builtin.lineinfile:
+        state: present
+        path: /etc/hosts
+        search_string: "{{ item.ip }}"
+        line: "{{ item.ip }} {{ item.name }}"
+      loop: "{{ workers }}"
+
+- name: Install Microk8s
+  hosts: all
+  tasks:
+    - name: Install Microk8s
+      ansible.builtin.include_role:
+        name: istvano.microk8s
+      vars:
+        microk8s_group_HA: masters
+        microk8s_group_WORKERS: workers
+        microk8s_plugins:
+          ingress: true
+          host-access: true
+          helm3: false
+          registry: true
+        users:
+          - "{{ ansible_user }}"
+
+    - name: Reboot
+      become: true
+      ansible.builtin.reboot:
+        reboot_timeout: 3600
+
+- name: Fetch kubeconfig from master1
+  hosts: master1
+  vars:
+    kubeconfig_dest: "{{ lookup('env','HOME') | default(lookup('env','USERPROFILE'), true) }}/.kube"
+  tasks:
+    - name: Ensure local kubeconfig directory exists
+      delegate_to: localhost
+      run_once: true
+      ansible.builtin.file:
+        path: "{{ kubeconfig_dest | dirname }}"
+        state: directory
+        mode: "0700"
+
+    - name: Read microk8s kubeconfig
+      become: true
+      ansible.builtin.command: microk8s config
+      register: kubeconfig_out
+      changed_when: false
+
+    - name: Write kubeconfig locally
+      delegate_to: localhost
+      run_once: true
+      ansible.builtin.copy:
+        content: "{{ kubeconfig_out.stdout }}"
+        dest: "{{ kubeconfig_dest }}/config`"
+        mode: "0600"
