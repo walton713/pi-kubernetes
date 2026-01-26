@@ -1,5 +1,5 @@
-[master]
-192.168.0.102 ansible_user=hal
+[masters]
+master1 ansible_user=hal
 
 [workers]
-192.168.0.103 ansible_user=hal
+worker1 ansible_user=hal

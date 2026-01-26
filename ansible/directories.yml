@@ -1,0 +1,9 @@
+---
+
+- name: Create Persistence Directories
+  hosts: master1
+  tasks:
+    - name: Create Postgres Directory
+      ansible.builtin.file:
+        state: directory
+        path: /mnt/data/postgres
