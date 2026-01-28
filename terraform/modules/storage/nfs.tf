@@ -94,7 +94,7 @@ resource "kubernetes_deployment_v1" "nfs" {
   }
 
   spec {
-    replicas               = "1"
+    replicas               = 1
     revision_history_limit = 3
 
     selector {
