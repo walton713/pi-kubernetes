@@ -60,7 +60,7 @@ resource "kubernetes_persistent_volume_claim_v1" "nfs" {
 
   metadata {
     name      = "nfs"
-    namespace = "storage"
+    namespace = kubernetes_namespace_v1.storage.metadata.0.name
   }
 
   spec {
@@ -86,7 +86,7 @@ resource "kubernetes_deployment_v1" "nfs" {
 
   metadata {
     name      = "nfs-server"
-    namespace = "storage"
+    namespace = kubernetes_namespace_v1.storage.metadata.0.name
 
     labels = {
       app = "nfs-server"
@@ -167,7 +167,7 @@ resource "kubernetes_service_v1" "nfs" {
 
   metadata {
     name      = "nfs-server"
-    namespace = "storage"
+    namespace = kubernetes_namespace_v1.storage.metadata.0.name
 
     labels = {
       app = "nfs-server"
@@ -203,6 +203,6 @@ data "kubernetes_service_v1" "nfs" {
 
   metadata {
     name      = "nfs-server"
-    namespace = "storage"
+    namespace = kubernetes_namespace_v1.storage.metadata.0.name
   }
 }
