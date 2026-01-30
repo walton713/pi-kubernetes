@@ -2,7 +2,6 @@ locals {
   namespace = "data"
 
   postgres = {
-    app  = "postgres"
     name = "postgres"
 
     deployment = {

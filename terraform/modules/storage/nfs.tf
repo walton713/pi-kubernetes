@@ -13,26 +13,24 @@ resource "kubernetes_labels" "master_node" {
 
 resource "kubernetes_namespace_v1" "storage" {
   metadata {
-    name = "storage"
+    name = local.namespace
   }
 }
 
 resource "kubernetes_persistent_volume_v1" "nfs" {
   metadata {
-    name = "nfs"
+    name = local.nfs.name
 
-    labels = {
-      directory = "data"
-    }
+    labels = local.nfs.persistence.labels
   }
 
   spec {
-    access_modes                     = ["ReadWriteOnce"]
-    persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = "local-storage"
+    access_modes                     = local.nfs.persistence.access_modes
+    persistent_volume_reclaim_policy = local.nfs.persistence.reclaim_policy
+    storage_class_name               = local.nfs.persistence.storage_class
 
     capacity = {
-      storage = "800Gi"
+      storage = local.nfs.persistence.capacity
     }
 
     node_affinity {
@@ -49,7 +47,7 @@ resource "kubernetes_persistent_volume_v1" "nfs" {
 
     persistent_volume_source {
       local {
-        path = "/mnt/data"
+        path = local.nfs.persistence.local_path
       }
     }
   }
@@ -59,24 +57,22 @@ resource "kubernetes_persistent_volume_claim_v1" "nfs" {
   wait_until_bound = true
 
   metadata {
-    name      = "nfs"
-    namespace = kubernetes_namespace_v1.storage.metadata.0.name
+    name      = local.nfs.name
+    namespace = local.namespace
   }
 
   spec {
-    access_modes       = ["ReadWriteOnce"]
-    storage_class_name = "local-storage"
+    access_modes       = local.nfs.persistence.access_modes
+    storage_class_name = local.nfs.persistence.storage_class
 
     resources {
       requests = {
-        storage = "800Gi"
+        storage = local.nfs.persistence.capacity
       }
     }
 
     selector {
-      match_labels = {
-        directory = "data"
-      }
+      match_labels = local.nfs.persistence.labels
     }
   }
 }
@@ -85,55 +81,48 @@ resource "kubernetes_deployment_v1" "nfs" {
   wait_for_rollout = true
 
   metadata {
-    name      = "nfs-server"
-    namespace = kubernetes_namespace_v1.storage.metadata.0.name
+    name      = local.nfs.name
+    namespace = local.namespace
 
-    labels = {
-      app = "nfs-server"
-    }
+    labels = local.nfs.deployment.labels
   }
 
   spec {
-    replicas               = 1
-    revision_history_limit = 3
+    replicas               = local.nfs.deployment.replicas
+    revision_history_limit = local.nfs.deployment.history
 
     selector {
-      match_labels = {
-        app = "nfs-server"
-      }
+      match_labels = local.nfs.deployment.labels
     }
 
     template {
       metadata {
-        labels = {
-          app  = "nfs-server"
-          name = "nfs-server"
-        }
+        labels = local.nfs.deployment.labels
       }
 
       spec {
         container {
-          image = "itsthenetwork/nfs-server-alpine:11-arm"
-          name  = "nfs-server"
+          image = local.nfs.deployment.image
+          name  = local.nfs.name
 
           env {
             name  = "SHARED_DIRECTORY"
-            value = "/exports"
+            value = local.nfs.deployment.volume.mount_path
           }
 
           port {
-            container_port = 2049
-            name           = "nfs"
+            container_port = local.nfs.deployment.nfs_port.port
+            name           = local.nfs.deployment.nfs_port.name
           }
 
           port {
-            container_port = 20048
-            name           = "mountd"
+            container_port = local.nfs.deployment.mountd_port.port
+            name           = local.nfs.deployment.mountd_port.name
           }
 
           port {
-            container_port = 111
-            name           = "rpcbind"
+            container_port = local.nfs.deployment.rpcbind_port.port
+            name           = local.nfs.deployment.rpcbind_port.name
           }
 
           security_context {
@@ -141,20 +130,18 @@ resource "kubernetes_deployment_v1" "nfs" {
           }
 
           volume_mount {
-            mount_path = "/exports"
-            name       = "nfs-pvc"
+            mount_path = local.nfs.deployment.volume.mount_path
+            name       = local.nfs.deployment.volume.name
           }
         }
 
-        node_selector = {
-          hdd = "enabled"
-        }
+        node_selector = local.nfs.deployment.node_selector
 
         volume {
-          name = "nfs-pvc"
+          name = local.nfs.deployment.volume.name
 
           persistent_volume_claim {
-            claim_name = "nfs"
+            claim_name = local.nfs.name
           }
         }
       }
@@ -166,35 +153,31 @@ resource "kubernetes_service_v1" "nfs" {
   wait_for_load_balancer = true
 
   metadata {
-    name      = "nfs-server"
-    namespace = kubernetes_namespace_v1.storage.metadata.0.name
+    name      = local.nfs.name
+    namespace = local.namespace
 
-    labels = {
-      app = "nfs-server"
-    }
+    labels = local.nfs.deployment.labels
   }
 
   spec {
-    type = "ClusterIP"
+    type = local.nfs.deployment.service_type
 
     port {
-      name = "nfs"
-      port = 2049
-    }
-
-    port {
-      name = "mountd"
-      port = 20048
+      name = local.nfs.deployment.nfs_port.name
+      port = local.nfs.deployment.nfs_port.port
     }
 
     port {
-      name = "rpcbind"
-      port = 111
+      name = local.nfs.deployment.mountd_port.name
+      port = local.nfs.deployment.mountd_port.port
     }
 
-    selector = {
-      app = "nfs-server"
+    port {
+      name = local.nfs.deployment.rpcbind_port.name
+      port = local.nfs.deployment.rpcbind_port.port
     }
+
+    selector = local.nfs.deployment.labels
   }
 }
 
@@ -202,7 +185,7 @@ data "kubernetes_service_v1" "nfs" {
   depends_on = [kubernetes_service_v1.nfs]
 
   metadata {
-    name      = "nfs-server"
-    namespace = kubernetes_namespace_v1.storage.metadata.0.name
+    name      = local.nfs.name
+    namespace = local.namespace
   }
 }
