@@ -5,6 +5,7 @@
 **/*.tfplan
 **/*.tfstate
 **/*.tfstate.backup
+**/*.tfvars
 
 # Jetbrains
 
