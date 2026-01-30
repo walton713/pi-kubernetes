@@ -37,7 +37,7 @@ terraform apply
 
 ### Terraform Variables ###
 
-Below is a list of variables that need to be set in the server.tfvars file. Since this is a single environment deployment, only sensitive values will be set in this file. Non-sensitive values will be set using locals.
+Below is a list of variables that need to be set in the local.tfvars file. Since this is a single environment deployment, only sensitive values will be set in this file. Non-sensitive values will be set using locals.
 
 | Variable      | Description                                  |
 |---------------|----------------------------------------------|

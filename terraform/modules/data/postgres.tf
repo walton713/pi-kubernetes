@@ -52,36 +52,29 @@ resource "kubernetes_deployment_v1" "postgres" {
   wait_for_rollout = true
 
   metadata {
-    name      = "postgres"
-    namespace = kubernetes_namespace_v1.data.metadata.0.name
+    name      = local.postgres.name
+    namespace = local.namespace
 
-    labels = {
-      app = "postgres"
-    }
+    labels = local.postgres.deployment.labels
   }
 
   spec {
-    replicas               = 1
-    revision_history_limit = 3
+    replicas               = local.postgres.deployment.replicas
+    revision_history_limit = local.postgres.deployment.history
 
     selector {
-      match_labels = {
-        app = "postgres"
-      }
+      match_labels = local.postgres.deployment.labels
     }
 
     template {
       metadata {
-        labels = {
-          app  = "postgres"
-          name = "postgres"
-        }
+        labels = local.postgres.deployment.labels
       }
 
       spec {
         container {
-          image = "postgres:18"
-          name  = "postgres"
+          image = local.postgres.deployment.image
+          name  = local.postgres.name
 
           env {
             name  = "POSTGRES_PASSWORD"
@@ -89,21 +82,21 @@ resource "kubernetes_deployment_v1" "postgres" {
           }
 
           port {
-            container_port = 5432
-            name           = "postgres"
+            container_port = local.postgres.deployment.port.port
+            name           = local.postgres.deployment.port.name
           }
 
           volume_mount {
-            mount_path = "/var/lib/postgresql"
-            name       = "postgres-pvc"
+            mount_path = local.postgres.deployment.volume.mount_path
+            name       = local.postgres.deployment.volume.name
           }
         }
 
         volume {
-          name = "postgres-pvc"
+          name = local.postgres.deployment.volume.name
 
           persistent_volume_claim {
-            claim_name = "postgres"
+            claim_name = local.postgres.name
           }
         }
       }
@@ -115,27 +108,23 @@ resource "kubernetes_service_v1" "postgres" {
   wait_for_load_balancer = true
 
   metadata {
-    name      = "postgres"
-    namespace = kubernetes_namespace_v1.data.metadata.0.name
+    name      = local.postgres.name
+    namespace = local.namespace
 
-    labels = {
-      app = "postgres"
-    }
+    labels = local.postgres.deployment.labels
   }
 
   spec {
-    type = "NodePort"
+    type = local.postgres.deployment.service_type
 
     port {
-      name        = "postgres"
-      node_port   = 30432
-      port        = 5432
-      protocol    = "TCP"
-      target_port = 5432
+      name        = local.postgres.deployment.port.name
+      node_port   = local.postgres.deployment.port.node_port
+      port        = local.postgres.deployment.port.port
+      protocol    = local.postgres.deployment.port.protocol
+      target_port = local.postgres.deployment.port.port
     }
 
-    selector = {
-      app = "postgres"
-    }
+    selector = local.postgres.deployment.labels
   }
 }
