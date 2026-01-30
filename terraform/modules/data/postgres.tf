@@ -13,8 +13,7 @@ resource "kubernetes_secret_v1" "postgres" {
 
 resource "kubernetes_persistent_volume_v1" "postgres" {
   metadata {
-    name = local.postgres.name
-
+    name   = local.postgres.name
     labels = local.postgres.persistence.labels
   }
 
@@ -67,8 +66,7 @@ resource "kubernetes_deployment_v1" "postgres" {
   metadata {
     name      = local.postgres.name
     namespace = local.namespace
-
-    labels = local.postgres.deployment.labels
+    labels    = local.postgres.deployment.labels
   }
 
   spec {
@@ -127,8 +125,7 @@ resource "kubernetes_service_v1" "postgres" {
   metadata {
     name      = local.postgres.name
     namespace = local.namespace
-
-    labels = local.postgres.deployment.labels
+    labels    = local.postgres.deployment.labels
   }
 
   spec {
