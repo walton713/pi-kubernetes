@@ -1,31 +1,23 @@
-resource "kubernetes_namespace_v1" "data" {
-  metadata {
-    name = "data"
-  }
-}
-
 resource "kubernetes_persistent_volume_v1" "postgres" {
   metadata {
-    name = "postgres"
+    name = local.postgres.name
 
-    labels = {
-      directory = "postgres"
-    }
+    labels = local.postgres.persistence.labels
   }
 
   spec {
-    access_modes                     = ["ReadWriteMany"]
-    persistent_volume_reclaim_policy = "Retain"
-    storage_class_name               = "fast"
-    volume_mode                      = "Filesystem"
+    access_modes                     = local.postgres.persistence.access_modes
+    persistent_volume_reclaim_policy = local.postgres.persistence.reclaim_policy
+    storage_class_name               = local.postgres.persistence.storage_class
+    volume_mode                      = local.postgres.persistence.volume_mode
 
     capacity = {
-      storage = "400Gi"
+      storage = local.postgres.persistence.capacity
     }
 
     persistent_volume_source {
       nfs {
-        path   = "/postgres"
+        path   = local.postgres.persistence.nfs_path
         server = var.storage_ip
       }
     }
@@ -36,24 +28,22 @@ resource "kubernetes_persistent_volume_claim_v1" "postgres" {
   wait_until_bound = true
 
   metadata {
-    name      = "postgres"
-    namespace = kubernetes_namespace_v1.data.metadata.0.name
+    name      = local.postgres.name
+    namespace = local.namespace
   }
 
   spec {
-    access_modes       = ["ReadWriteMany"]
-    storage_class_name = "fast"
+    access_modes       = local.postgres.persistence.access_modes
+    storage_class_name = local.postgres.persistence.storage_class
 
     resources {
       requests = {
-        storage = "400Gi"
+        storage = local.postgres.persistence.capacity
       }
     }
 
     selector {
-      match_labels = {
-        directory = "postgres"
-      }
+      match_labels = local.postgres.persistence.labels
     }
   }
 }
