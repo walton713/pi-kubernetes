@@ -1,6 +1,6 @@
 # Home Server #
 
-This README covers setting up the Walton Home Server on any number of Raspberry Pi's running Ubuntu Server.
+This README covers setting up a Home Server on any number of Raspberry Pi's running Ubuntu Server.
 
 ## Building Nodes ##
 
