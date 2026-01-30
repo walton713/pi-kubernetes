@@ -26,13 +26,13 @@ This will ensure that the directories exist on the external HDD used by the NFS 
 Terraform handles deployment to the kubernetes cluster. To deploy Terraform changes, first switch to the terraform directory and run:
 
 ```bash
-terraform plan
+terraform plan -var-file=local.tfvars
 ```
 
 This will create a plan of the changes to be made. If everything looks good, run:
 
 ```bash
-terraform apply
+terraform apply -var-file=local.tfvars
 ```
 
 ### Terraform Variables ###

@@ -150,8 +150,6 @@ resource "kubernetes_deployment_v1" "nfs" {
 }
 
 resource "kubernetes_service_v1" "nfs" {
-  wait_for_load_balancer = true
-
   metadata {
     name      = local.nfs.name
     namespace = local.namespace

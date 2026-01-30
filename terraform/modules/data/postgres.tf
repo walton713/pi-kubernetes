@@ -105,8 +105,6 @@ resource "kubernetes_deployment_v1" "postgres" {
 }
 
 resource "kubernetes_service_v1" "postgres" {
-  wait_for_load_balancer = true
-
   metadata {
     name      = local.postgres.name
     namespace = local.namespace
