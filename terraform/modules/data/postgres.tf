@@ -1,3 +1,16 @@
+resource "kubernetes_secret_v1" "postgres" {
+  type = "Opaque"
+
+  metadata {
+    name      = "${local.postgres.name}-secret"
+    namespace = local.namespace
+  }
+
+  data = {
+    postgres_password = var.postgres_pass
+  }
+}
+
 resource "kubernetes_persistent_volume_v1" "postgres" {
   metadata {
     name = local.postgres.name
@@ -77,8 +90,14 @@ resource "kubernetes_deployment_v1" "postgres" {
           name  = local.postgres.name
 
           env {
-            name  = "POSTGRES_PASSWORD"
-            value = var.postgres_pass
+            name = "POSTGRES_PASSWORD"
+
+            value_from {
+              secret_key_ref {
+                name = kubernetes_secret_v1.postgres.metadata.0.name
+                key  = "postgres_password"
+              }
+            }
           }
 
           port {
