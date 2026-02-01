@@ -4,7 +4,7 @@ This README covers setting up a Home Server on any number of Raspberry Pi's runn
 
 ## Building Nodes ##
 
-Preparing the Raspberry Pis for kubernetes is handled by Ansible. To build the nodes, run:
+Preparing the Raspberry Pis for kubernetes is handled by Ansible. To build the nodes (currently only one), run:
 
 ```bash
 make build

@@ -1,5 +1,2 @@
 [masters]
-master1 ansible_user=hal
-
-[workers]
-worker1 ansible_user=hal
+server ansible_user=hal

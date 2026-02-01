@@ -3,7 +3,7 @@ resource "kubernetes_labels" "master_node" {
   kind        = "Node"
 
   metadata {
-    name = "master1"
+    name = "server"
   }
 
   labels = {
@@ -54,6 +54,7 @@ resource "kubernetes_persistent_volume_v1" "nfs" {
 }
 
 resource "kubernetes_persistent_volume_claim_v1" "nfs" {
+  depends_on       = [kubernetes_namespace_v1.storage]
   wait_until_bound = true
 
   metadata {
@@ -78,6 +79,7 @@ resource "kubernetes_persistent_volume_claim_v1" "nfs" {
 }
 
 resource "kubernetes_deployment_v1" "nfs" {
+  depends_on       = [kubernetes_namespace_v1.storage]
   wait_for_rollout = true
 
   metadata {
@@ -150,6 +152,8 @@ resource "kubernetes_deployment_v1" "nfs" {
 }
 
 resource "kubernetes_service_v1" "nfs" {
+  depends_on = [kubernetes_namespace_v1.storage]
+
   metadata {
     name      = local.nfs.name
     namespace = local.namespace
