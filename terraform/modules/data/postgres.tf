@@ -1,5 +1,6 @@
 resource "kubernetes_secret_v1" "postgres" {
-  type = "Opaque"
+  depends_on = [kubernetes_namespace_v1.data]
+  type       = "Opaque"
 
   metadata {
     name      = "${local.postgres.name}-secret"
