@@ -1,7 +1,7 @@
 ---
 
 - name: Create Persistence Directories
-  hosts: master1
+  hosts: server
   tasks:
     - name: Create Postgres Directory
       ansible.builtin.file:
