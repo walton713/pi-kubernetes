@@ -79,7 +79,7 @@ resource "kubernetes_persistent_volume_claim_v1" "nfs" {
 }
 
 resource "kubernetes_deployment_v1" "nfs" {
-  depends_on       = [kubernetes_namespace_v1.storage]
+  depends_on       = [kubernetes_namespace_v1.storage, kubernetes_persistent_volume_claim_v1.nfs]
   wait_for_rollout = true
 
   metadata {
@@ -152,7 +152,7 @@ resource "kubernetes_deployment_v1" "nfs" {
 }
 
 resource "kubernetes_service_v1" "nfs" {
-  depends_on = [kubernetes_namespace_v1.storage]
+  depends_on = [kubernetes_namespace_v1.storage, kubernetes_deployment_v1.nfs]
 
   metadata {
     name      = local.nfs.name

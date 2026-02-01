@@ -24,7 +24,7 @@ resource "kubernetes_persistent_volume_v1" "redis" {
 }
 
 resource "kubernetes_persistent_volume_claim_v1" "redis" {
-  depends_on       = [kubernetes_namespace_v1.data]
+  depends_on       = [kubernetes_namespace_v1.data, kubernetes_persistent_volume_v1.redis]
   wait_until_bound = true
 
   metadata {
@@ -49,7 +49,7 @@ resource "kubernetes_persistent_volume_claim_v1" "redis" {
 }
 
 resource "kubernetes_deployment_v1" "redis" {
-  depends_on       = [kubernetes_namespace_v1.data]
+  depends_on       = [kubernetes_namespace_v1.data, kubernetes_persistent_volume_claim_v1.redis]
   wait_for_rollout = true
 
   metadata {
@@ -100,7 +100,7 @@ resource "kubernetes_deployment_v1" "redis" {
 }
 
 resource "kubernetes_service_v1" "redis" {
-  depends_on = [kubernetes_namespace_v1.data]
+  depends_on = [kubernetes_namespace_v1.data, kubernetes_deployment_v1.redis]
   metadata {
     name      = local.redis.name
     namespace = local.namespace

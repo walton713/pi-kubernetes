@@ -38,7 +38,7 @@ resource "kubernetes_persistent_volume_v1" "postgres" {
 }
 
 resource "kubernetes_persistent_volume_claim_v1" "postgres" {
-  depends_on       = [kubernetes_namespace_v1.data]
+  depends_on       = [kubernetes_namespace_v1.data, kubernetes_persistent_volume_v1.postgres]
   wait_until_bound = true
 
   metadata {
@@ -63,7 +63,7 @@ resource "kubernetes_persistent_volume_claim_v1" "postgres" {
 }
 
 resource "kubernetes_deployment_v1" "postgres" {
-  depends_on       = [kubernetes_namespace_v1.data]
+  depends_on       = [kubernetes_namespace_v1.data, kubernetes_secret_v1.postgres, kubernetes_persistent_volume_claim_v1.postgres]
   wait_for_rollout = true
 
   metadata {
@@ -125,7 +125,7 @@ resource "kubernetes_deployment_v1" "postgres" {
 }
 
 resource "kubernetes_service_v1" "postgres" {
-  depends_on = [kubernetes_namespace_v1.data]
+  depends_on = [kubernetes_namespace_v1.data, kubernetes_deployment_v1.postgres]
   metadata {
     name      = local.postgres.name
     namespace = local.namespace
