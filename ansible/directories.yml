@@ -12,3 +12,9 @@
       ansible.builtin.file:
         state: directory
         path: /mnt/data/redis
+
+    - name: Create Grafana Directory
+      ansible.builtin.file:
+        state: directory
+        path: /mnt/data/grafana
+        mode: '0777'

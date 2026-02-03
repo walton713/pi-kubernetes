@@ -4,8 +4,7 @@ variable "grafana_pass" {
   sensitive   = true
 }
 
-variable "postgres_pass" {
+variable "storage_ip" {
   type        = string
-  description = "The admin password for the postgres instance"
-  sensitive   = true
+  description = "IP Address for the NFS Server"
 }
