@@ -49,31 +49,38 @@ resource "kubernetes_persistent_volume_claim_v1" "grafana" {
 }
 
 resource "helm_release" "grafana" {
-  depends_on = [kubernetes_persistent_volume_claim_v1.grafana]
+  depends_on = [kubernetes_namespace_v1.monitoring, kubernetes_persistent_volume_claim_v1.grafana]
   name       = local.grafana.name
   repository = local.grafana.release.repository
   chart      = local.grafana.name
   namespace  = local.namespace
 
   values = [
-    <<-EOF
-    initChownData:
-      enabled: false
-    rbac:
-      create: false
-    serviceAccount:
-      create: false
-    ingress:
-      enabled: true
-      annotations:
-        kubernetes.io/ingress-class: ${local.grafana.release.ingress_class}
-      hosts:
-        - ${local.grafana.release.host}
-    persistence:
-      enabled: true
-      existingClaim: ${kubernetes_persistent_volume_claim_v1.grafana.metadata.0.name}
-    adminPassword: ${var.grafana_pass}
-    namespaceOverride: ${local.namespace}
-    EOF
+    yamlencode({
+      initChownData = {
+        enabled = false
+      }
+      rbac = {
+        create = false
+      }
+      serviceAccount = {
+        create = false
+      }
+      ingress = {
+        enabled = true
+        annotations = {
+          "kubernetes.io/ingress-class" = local.grafana.release.ingress_class
+        }
+        hosts = [
+          local.grafana.release.host
+        ]
+      }
+      persistence = {
+        enabled       = true
+        existingClaim = kubernetes_persistent_volume_claim_v1.grafana.metadata.0.name
+      }
+      adminPassword     = var.grafana_pass
+      namespaceOverride = local.namespace
+    })
   ]
 }
