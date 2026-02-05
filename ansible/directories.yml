@@ -24,3 +24,9 @@
         state: directory
         path: /mnt/data/prometheus
         mode: '0777'
+
+    - name: Create Loki Directory
+      ansible.builtin.file:
+        state: directory
+        path: /mnt/data/loki
+        mode: '0777'

@@ -24,6 +24,24 @@ locals {
     }
   }
 
+  loki = {
+    name       = "loki"
+    repository = "https://grafana.github.io/helm-charts"
+
+    persistence = {
+      access_modes   = ["ReadWriteOnce"]
+      capacity       = "20Gi"
+      nfs_path       = "/loki"
+      reclaim_policy = "Retain"
+      storage_class  = "slow"
+      volume_mode    = "Filesystem"
+
+      labels = {
+        directory = "loki"
+      }
+    }
+  }
+
   prometheus = {
     name       = "prometheus"
     repository = "https://prometheus-community.github.io/helm-charts"
