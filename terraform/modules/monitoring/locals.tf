@@ -102,4 +102,9 @@ locals {
       scrape_interval = "15s"
     }
   }
+
+  promtail = {
+    name       = "promtail"
+    repository = "https://grafana.github.io/helm-charts"
+  }
 }

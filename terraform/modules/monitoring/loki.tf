@@ -123,11 +123,11 @@ resource "helm_release" "loki" {
       singleBinary = {
         replicas = 1
         persistence = {
-          enabled       = false
+          enabled = false
         }
         extraVolumes = [
           {
-            name: "loki-storage"
+            name : "loki-storage"
             persistentVolumeClain = {
               claimName = local.loki.name
             }
@@ -135,7 +135,7 @@ resource "helm_release" "loki" {
         ]
         extraVolumeMounts = [
           {
-            name = "loki-storage"
+            name      = "loki-storage"
             mountPath = "/var/loki"
           }
         ]
@@ -186,6 +186,59 @@ resource "helm_release" "loki" {
       bloomGateway = {
         replicas = 0
       }
+    })
+  ]
+}
+
+resource "helm_release" "promtail" {
+  depends_on = [kubernetes_namespace_v1.monitoring, helm_release.loki]
+  name       = local.promtail.name
+  repository = local.promtail.repository
+  chart      = local.promtail.name
+  namespace  = local.namespace
+
+  values = [
+    yamlencode({
+      config = {
+        clients = [{
+          url = "http://loki-gateway.${local.namespace}.svc.cluster.local/loki/api/v1/push"
+        }]
+      }
+
+      # Move pipelineStages OUT of snippets to avoid the 'tpl' string error
+      pipelineStages = [
+        { cri = {} }
+      ]
+
+      # Use the chart's built-in extraRelabelConfigs which handles lists correctly
+      extraRelabelConfigs = [
+        {
+          source_labels = ["__meta_kubernetes_pod_label_app"]
+          target_label  = "app"
+        },
+        {
+          source_labels = ["__meta_kubernetes_namespace"]
+          target_label  = "namespace"
+        },
+        {
+          source_labels = ["__meta_kubernetes_pod_name"]
+          target_label  = "pod"
+        },
+        {
+          source_labels = ["__meta_kubernetes_pod_container_name"]
+          target_label  = "container"
+        }
+      ]
+
+      resources = {
+        limits   = { cpu = "200m", memory = "256Mi" }
+        requests = { cpu = "50m", memory = "128Mi" }
+      }
+
+      tolerations = [{
+        operator = "Exists"
+        effect   = "NoSchedule"
+      }]
     })
   ]
 }
