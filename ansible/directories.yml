@@ -8,11 +8,6 @@
         state: directory
         path: /mnt/data/postgres
 
-    - name: Create Redis Directory
-      ansible.builtin.file:
-        state: directory
-        path: /mnt/data/redis
-
     - name: Create Grafana Directory
       ansible.builtin.file:
         state: directory

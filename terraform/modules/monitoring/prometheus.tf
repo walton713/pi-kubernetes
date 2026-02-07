@@ -161,29 +161,3 @@ resource "helm_release" "prometheus-postgres-exporter" {
     })
   ]
 }
-
-resource "helm_release" "prometheus-redis-exporter" {
-  depends_on = [kubernetes_namespace_v1.monitoring]
-  name       = local.prometheus.exporters.redis.name
-  repository = local.prometheus.repository
-  chart      = local.prometheus.exporters.redis.name
-  namespace  = local.namespace
-
-  values = [
-    yamlencode({
-      rbac = {
-        create = false
-      }
-      serviceAccount = {
-        create = false
-      }
-      redisAddress      = local.prometheus.exporters.redis.address
-      namespaceOverride = local.namespace
-      annotations = {
-        "prometheus.io/port"   = local.prometheus.exporters.redis.port
-        "prometheus.io/schema" = local.prometheus.exporters.redis.schema
-        "prometheus.io/scrape" = local.prometheus.exporters.redis.scrape
-      }
-    })
-  ]
-}

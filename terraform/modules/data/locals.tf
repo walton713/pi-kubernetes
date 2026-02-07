@@ -41,45 +41,4 @@ locals {
       }
     }
   }
-
-  redis = {
-    name = "redis"
-
-    deployment = {
-      history      = 3
-      image        = "redis:8-alpine"
-      replicas     = 1
-      service_type = "NodePort"
-
-      labels = {
-        app  = "redis"
-        name = "redis"
-      }
-
-      port = {
-        name      = "redis"
-        node_port = 30379
-        port      = 6379
-        protocol  = "TCP"
-      }
-
-      volume = {
-        mount_path = "/data"
-        name       = "redis-pvc"
-      }
-    }
-
-    persistence = {
-      access_modes   = ["ReadWriteOnce"]
-      capacity       = "20Gi"
-      nfs_path       = "/redis"
-      reclaim_policy = "Retain"
-      storage_class  = "fast"
-      volume_mode    = "Filesystem"
-
-      labels = {
-        directory = "redis"
-      }
-    }
-  }
 }
