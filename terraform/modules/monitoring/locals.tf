@@ -60,14 +60,6 @@ locals {
           user     = "postgres"
         }
       }
-
-      redis = {
-        address = "redis://redis.data.svc.cluster.local:6379"
-        name    = "prometheus-redis-exporter"
-        port    = "9121"
-        schema  = "http"
-        scrape  = "true"
-      }
     }
 
     ingress = {
