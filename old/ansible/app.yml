@@ -1,8 +1,0 @@
----
-
-- name: Manage App
-  hosts: master
-  tasks:
-    - name: Manage App Namespace
-      ansible.builtin.include_role:
-        name: app

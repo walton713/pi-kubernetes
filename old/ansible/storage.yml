@@ -1,8 +1,0 @@
----
-
-- name: Manage NFS Storage
-  hosts: master
-  tasks:
-    - name: Manage Storage Namespace
-      ansible.builtin.include_role:
-        name: storage
