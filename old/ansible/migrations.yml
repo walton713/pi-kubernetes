@@ -1,9 +1,0 @@
----
-
-- name: Manage MySQL Migrations
-  hosts: master
-  tasks:
-    - name: Manage Database Migrations
-      ansible.builtin.include_role:
-        name: database
-        tasks_from: migrations

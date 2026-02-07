@@ -1,8 +1,0 @@
----
-
-- name: Manage Api
-  hosts: master
-  tasks:
-    - name: Manage Api Namespace
-      ansible.builtin.include_role:
-        name: api
