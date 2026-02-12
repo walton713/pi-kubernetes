@@ -1,9 +1,12 @@
 ---
 
-- name: Update Nodes
+- name: Install microk8s on all Nodes
   hosts: all
   vars:
     kubeconfig_dest: "{{ lookup('env','HOME') | default(lookup('env','USERPROFILE'), true) }}/.kube"
+    workers:
+      - name: worker1
+        ip: "192.168.0.103"
   tasks:
     - name: Update/Upgrade Apt Packages
       become: true
@@ -27,6 +30,7 @@
         owner: nobody
         group: nogroup
         mode: '0777'
+      when: ansible_hostname == "server"
 
     - name: Mount HDD
       become: true
@@ -35,13 +39,24 @@
         path: /etc/fstab
         search_string: 52ec3ffb-c7db-4bdc-ada3-a4134755ad74
         line: UUID=52ec3ffb-c7db-4bdc-ada3-a4134755ad74 /mnt/data ext4 defaults 0 0
+      when: ansible_hostname == "server"
+
+    - name: Add Worker Nodes to Hosts File
+      become: true
+      ansible.builtin.lineinfile:
+        state: present
+        path: /etc/hosts
+        search_string: "{{ item.ip }}"
+        line: "{{ item.ip }} {{ item.name }}"
+      loop: "{{ workers }}"
+      when: ansible_hostname == "server"
 
     - name: Install Microk8s
       ansible.builtin.include_role:
         name: istvano.microk8s
       vars:
         microk8s_group_HA: masters
-        microk8s_group_WORKERS: []
+        microk8s_group_WORKERS: workers
         microk8s_plugins:
           ingress: true
           host-access: true
@@ -68,6 +83,7 @@
       ansible.builtin.command: microk8s config
       register: kubeconfig_out
       changed_when: false
+      when: ansible_hostname == "server"
 
     - name: Write kubeconfig locally
       delegate_to: localhost
