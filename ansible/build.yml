@@ -6,7 +6,7 @@
     kubeconfig_dest: "{{ lookup('env','HOME') | default(lookup('env','USERPROFILE'), true) }}/.kube"
     workers:
       - name: worker1
-        ip: "192.168.0.108"
+        ip: "192.168.0.103"
   tasks:
     - name: Update/Upgrade Apt Packages
       become: true
